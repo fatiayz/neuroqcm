@@ -165,8 +165,39 @@ let activeSubject="";
 function openMatter(id){activeSubject=id;let s=subjects().find(x=>x.id===id);matterTitle.textContent=s.name;courseList.innerHTML=s.courses.map(c=>`<div class="row course"><div class="letter">${esc(c.code).slice(0,2)}</div><div class="info"><span class="badge">${esc(c.code)}</span><h3>${esc(c.title)}</h3><div class="mut">${c.files?.length||1} document(s)</div></div><div class="actions"><button class="btn soft" onclick="event.stopPropagation();courseFiles('${s.id}','${c.id}')">Polys</button><button class="btn" onclick="event.stopPropagation();quizFor('${s.id}','${c.id}')">Faire les QCM</button></div></div>`).join("");show("matter")}
 function courseFiles(sid,cid){let c=subjects().find(s=>s.id===sid).courses.find(c=>c.id===cid);modalTitle.textContent=c.code+" — "+c.title;modalBody.innerHTML=(c.files||[]).map((f,i)=>`<div class="row"><div><b>Document ${i+1}</b><div class="mut">${esc(f)}</div></div><button class="btn" onclick="openPDF('${sid}','${cid}',${i})">Ouvrir</button></div>`).join("")||'<p class="mut">Aucun document.</p>';modal.classList.add("on")}
 function closeModal(){modal.classList.remove("on")}
-function openPDF(sid,cid,i){let c=subjects().find(s=>s.id===sid).courses.find(c=>c.id===cid),f=c.files[i];if(c.customData){openData(c.customData);return}if(PDFS[f]){openData("data:application/pdf;base64,"+PDFS[f]);return}window.open(encodeURI(f),"_blank")}
-function openData(data){let a=document.createElement("a");a.href=data;a.target="_blank";a.click()}
+function openPDF(sid,cid,i){
+  let c=subjects().find(s=>s.id===sid).courses.find(c=>c.id===cid),f=c.files[i];
+  if(c.customData){openData(c.customData,f||"document.pdf");return}
+  if(PDFS[f]){openBase64PDF(PDFS[f],f);return}
+  window.open(encodeURI(f),"_blank");
+}
+function openBase64PDF(b64,name){
+  try{
+    const clean=b64.replace(/\s/g,"");
+    const slice=1024*512, parts=[];
+    for(let off=0;off<clean.length;off+=slice){
+      const bin=atob(clean.slice(off,off+slice));
+      const bytes=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+      parts.push(bytes);
+    }
+    const blob=new Blob(parts,{type:"application/pdf"});
+    const url=URL.createObjectURL(blob);
+    const w=window.open(url,"_blank");
+    if(!w){
+      const a=document.createElement("a");
+      a.href=url;a.target="_blank";a.rel="noopener";a.download=name||"document.pdf";
+      document.body.appendChild(a);a.click();a.remove();
+    }
+    setTimeout(()=>URL.revokeObjectURL(url),120000);
+  }catch(e){alert("Impossible d’ouvrir ce poly. Recharge la page puis réessaie.");}
+}
+function openData(data,name){
+  try{
+    if(data.startsWith("data:application/pdf;base64,")){openBase64PDF(data.split(",")[1],name);return}
+    const a=document.createElement("a");a.href=data;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
+  }catch(e){alert("Impossible d’ouvrir ce document.");}
+}
 function fillCourseSelect(subSel,courseSel){let s=subjects().find(x=>x.id===subSel.value);courseSel.innerHTML='<option value="all">Tous les CM</option>'+s.courses.map(c=>`<option value="${c.id}">${esc(c.code)} — ${esc(c.title)}</option>`).join("")}
 function setupQ(){qsub.innerHTML=subjects().map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("");qsub.onchange=()=>fillCourseSelect(qsub,qcourse);fillCourseSelect(qsub,qcourse);qsetup.style.display="block";quiz.style.display="none"}
 function quizFor(sid,cid){show("qcm");qsub.value=sid;fillCourseSelect(qsub,qcourse);qcourse.value=cid}
