@@ -243,11 +243,52 @@ function saveTheme(){db.settings.name=admName.value||"Faty";db.settings.color=ad
 function applyTheme(){document.documentElement.style.setProperty("--t",db.settings.color||"#81d8d0")}
 function exportAll(){let a=document.createElement("a"),u=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:"application/json"}));a.href=u;a.download="SYFAXA_sauvegarde.json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function importAll(inp){let f=inp.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();applyTheme();renderAdmin();alert("Sauvegarde importée.")}catch(e){alert("Fichier invalide.")}};r.readAsText(f)}
-async function bootForUser(user){currentUser=user;authMsg.textContent="";try{const snap=await fbDb.collection("users").doc(user.uid).get();if(!snap.exists||snap.data().role!=="admin"){await fbAuth.signOut();authMsg.textContent="Ce compte n’a pas les droits administrateur SYFAXA.";return}if(snap.data().appState){db=snap.data().appState;normalizeDb();localStorage.setItem(KEY,JSON.stringify(db))}else{normalizeDb();await fbDb.collection("users").doc(user.uid).set({appState:db},{merge:true})}isCloudReady=true;authGate.classList.add("hide");logoutBtn.style.display="inline-block";cloudLabel.textContent="Synchronisé avec Firebase ✓";applyTheme();renderHome();renderSubjects()}catch(e){authMsg.textContent="Connexion à Firestore impossible : "+e.message;console.error(e)}}
-loginBtn.onclick=async()=>{authMsg.textContent="Connexion…";loginBtn.disabled=true;try{await fbAuth.signInWithEmailAndPassword(loginEmail.value.trim(),loginPassword.value)}catch(e){authMsg.textContent="E-mail ou mot de passe incorrect."}finally{loginBtn.disabled=false}};
-loginPassword.addEventListener("keydown",e=>{if(e.key==="Enter")loginBtn.click()});
-logoutBtn.onclick=()=>fbAuth.signOut();
-fbAuth.onAuthStateChanged(user=>{if(user){bootForUser(user)}else{currentUser=null;isCloudReady=false;authGate.classList.remove("hide");logoutBtn.style.display="none";cloudLabel.textContent="Non connecté"}});
+async function bootForUser(user){currentUser=user;authMsg.textContent="";try{const snap=await fbDb.collection("users").doc(user.uid).get();if(!snap.exists||snap.data().role!=="admin"){await fbAuth.signOut();authMsg.textContent="Ce compte n’a pas les droits administrateur SYFAXA.";return}if(snap.data().appState){db=snap.data().appState;normalizeDb();localStorage.setItem(KEY,JSON.stringify(db))}else{normalizeDb();await fbDb.collection("users").doc(user.uid).set({appState:db},{merge:true})}isCloudReady=true;authGate.classList.add("hide");logoutBtn.style.display="inline-block";cloudLabel.textContent="Synchronisé avec Firebase ✓";applyTheme();renderHome();renderSubjects() }catch(e){console.error("SYFAXA Firestore",e);isCloudReady=false;if(_cloudLabel)_cloudLabel.textContent="Connecté · mode local";_authGate.classList.add("hide");}}
+const _loginBtn=document.getElementById("loginBtn");
+const _loginEmail=document.getElementById("loginEmail");
+const _loginPassword=document.getElementById("loginPassword");
+const _authMsg=document.getElementById("authMsg");
+const _authGate=document.getElementById("authGate");
+const _logoutBtn=document.getElementById("logoutBtn");
+const _cloudLabel=document.getElementById("cloudLabel");
+
+async function syfaxaLogin(){
+  const email=(_loginEmail.value||"").trim(), password=_loginPassword.value||"";
+  if(!email||!password){_authMsg.textContent="Entre ton adresse e-mail et ton mot de passe.";return}
+  _authMsg.textContent="Connexion en cours…";_loginBtn.disabled=true;
+  try{
+    const cred=await fbAuth.signInWithEmailAndPassword(email,password);
+    _authMsg.textContent="Connexion réussie ✓";
+    // Entrée immédiate : Firestore ne doit pas bloquer l'écran après une authentification valide.
+    _authGate.classList.add("hide");
+    if(_logoutBtn)_logoutBtn.style.display="inline-block";
+    if(_cloudLabel)_cloudLabel.textContent="Connecté · synchronisation…";
+    bootForUser(cred.user);
+  }catch(e){
+    console.error("SYFAXA auth",e);
+    const code=e&&e.code?e.code:"";
+    _authMsg.textContent =
+      code.includes("invalid-credential")||code.includes("wrong-password")||code.includes("user-not-found")
+      ?"Adresse e-mail ou mot de passe incorrect."
+      :code.includes("too-many-requests")
+      ?"Trop de tentatives. Réessaie dans quelques minutes."
+      :"Connexion impossible : "+(e.message||code||"erreur inconnue");
+  }finally{_loginBtn.disabled=false}
+}
+_loginBtn.addEventListener("click",syfaxaLogin);
+_loginPassword.addEventListener("keydown",e=>{if(e.key==="Enter")syfaxaLogin()});
+if(_logoutBtn)_logoutBtn.addEventListener("click",()=>fbAuth.signOut());
+fbAuth.onAuthStateChanged(user=>{
+  if(user){
+    _authGate.classList.add("hide");
+    if(_logoutBtn)_logoutBtn.style.display="inline-block";
+    bootForUser(user);
+  }else{
+    currentUser=null;isCloudReady=false;_authGate.classList.remove("hide");
+    if(_logoutBtn)_logoutBtn.style.display="none";
+    if(_cloudLabel)_cloudLabel.textContent="Non connecté";
+  }
+});
 
 // ===== SYFAXA PREMIUM STUDY ENGINE =====
 let quizMode="normal", examTimer=null, examEnds=0, examAnswers={}, sessionCorrect=0;
