@@ -322,7 +322,7 @@ function runGlobalSearch(){
  let hits=[];
  subjects().forEach(sub=>sub.courses.forEach(c=>{let txt=(sub.name+' '+c.code+' '+c.title+' '+(c.files||[]).join(' ')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(txt.includes(term))hits.push({type:'Cours',title:sub.name+' · '+c.code,txt:c.title})}));
  questions().forEach(q=>{let txt=(q.q+' '+(q.exp||'')+' '+(q.chapter||'')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(txt.includes(term))hits.push({type:q.annale?'Annale / CT':'QCM',title:q.chapter||'Question',txt:q.q,id:q.id})});
- globalSearchResults.innerHTML=hits.length?hits.slice(0,80).map(h=>`<div class="searchHit"><span class="tag">${h.type}</span><b style="display:block;margin:5px 0">${esc(h.title)}</b><div>${esc(h.txt)}</div>${h.id?`<button class="btn soft" style="margin-top:7px" onclick="quizOne('${h.id}')">Ouvrir</button>`:''}</div>`).join('):'<p class="mut">Aucun résultat dans les contenus actuellement intégrés.</p>';
+ globalSearchResults.innerHTML=hits.length?hits.slice(0,80).map(h=>`<div class="searchHit"><span class="tag">${h.type}</span><b style="display:block;margin:5px 0">${esc(h.title)}</b><div>${esc(h.txt)}</div>${h.id?`<button class="btn soft" style="margin-top:7px" onclick="quizOne('${h.id}')">Ouvrir</button>`:''}</div>`).join(''):'<p class="mut">Aucun résultat dans les contenus actuellement intégrés.</p>';
 }
 
 function buildCrunchWeek(){
