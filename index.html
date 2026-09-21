@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeuroQCM — Neuropsychologie</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#6b7280;--p:#5b4bdb;--p2:#7667ea;--ok:#17835a;--bad:#c43c48;--line:#e5e7eb;--warn:#a16207}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(120deg,#352d8d,#6d5de7);color:white;padding:22px 18px}
+.wrap{max-width:980px;margin:auto}.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand h1{margin:0;font-size:25px}.brand small{opacity:.85}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.navbtn,.btn{border:0;border-radius:11px;padding:10px 14px;font-weight:700;cursor:pointer}
+.navbtn{background:#ffffff20;color:#fff}.navbtn.active{background:#fff;color:#4136a0}
+main{max-width:980px;margin:18px auto;padding:0 14px 40px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 5px 18px #1118270b}
+.stat b{font-size:26px;display:block;color:var(--p)} .muted{color:var(--muted)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0} select,input[type=number]{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.btn{background:var(--p);color:#fff}.btn.secondary{background:#eef0ff;color:#4338ca}.btn.danger{background:#fee2e2;color:#991b1b}
+.qhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.pill{font-size:12px;padding:5px 8px;border-radius:999px;background:#eeeefe;color:#4438a8;font-weight:700}.annale{background:#fff1c7;color:#8a5b00}
+.option{display:flex;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;cursor:pointer}.option:hover{background:#fafaff}
+.option.correct{border-color:#70c6a5;background:#eaf8f2}.option.wrong{border-color:#e69aa2;background:#fff0f1}
+.feedback{padding:12px;border-radius:12px;margin-top:12px}.feedback.ok{background:#eaf8f2;color:#116445}.feedback.bad{background:#fff0f1;color:#9d2633}
+.progress{height:9px;background:#e8eaf0;border-radius:999px;overflow:hidden;margin:10px 0 18px}.progress>div{height:100%;background:var(--p2)}
+.hide{display:none!important}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.space{justify-content:space-between}
+.savedItem{padding:12px 0;border-bottom:1px solid var(--line)}.savedItem:last-child{border:0}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.brand{align-items:flex-start;flex-direction:column}.qhead{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="brand"><div><h1>NeuroQCM</h1><small>Neuropsychologie L2 • entraînement & annales</small></div><div id="saveState">Sauvegarde locale activée</div></div>
+<nav><button class="navbtn active" data-view="home">Accueil</button><button class="navbtn" data-view="quiz">Faire un QCM</button><button class="navbtn" data-view="errors">Mes erreurs</button><button class="navbtn" data-view="saved">QCM sauvegardés</button><button class="navbtn" data-view="stats">Statistiques</button></nav>
+</div></header>
+<main>
+<section id="home" class="view">
+<div class="grid">
+<div class="card stat"><span class="muted">Questions disponibles</span><b id="nq">0</b><span>Neuropsychologie</span></div>
+<div class="card stat"><span class="muted">Questions vues</span><b id="seen">0</b><span>dans tes tentatives</span></div>
+<div class="card stat"><span class="muted">Taux de réussite</span><b id="rate">—</b><span>toutes tentatives</span></div>
+</div>
+<div class="card" style="margin-top:14px"><h2>Réviser les agnosies visuelles</h2><p class="muted">Questions basées sur ton CM « Syndrome occipital » et les extraits du CT 2025-2026. Les questions provenant directement des annales/CT sont signalées.</p><div class="row"><button class="btn" onclick="go('quiz')">Commencer</button><button class="btn secondary" onclick="startErrors()">Refaire mes erreurs</button></div></div>
+</section>
+
+<section id="quiz" class="view hide">
+<div class="card">
+<h2>Créer une session</h2>
+<div class="controls">
+<select id="chapter"><option value="all">Tous les chapitres</option></select>
+<select id="mode"><option value="all">Cours + annales</option><option value="annale">Annales / CT uniquement</option><option value="course">Cours uniquement</option></select>
+<select id="count"><option>5</option><option>10</option><option selected>15</option><option>20</option></select>
+<label class="row"><input id="shuffle" type="checkbox" checked> Mélanger</label>
+</div>
+<button class="btn" onclick="startQuiz()">Lancer le QCM</button>
+</div>
+<div id="runner" class="hide"></div>
+</section>
+
+<section id="errors" class="view hide"><div class="card"><div class="row space"><div><h2>Mes erreurs</h2><p class="muted">Les questions ratées restent enregistrées jusqu’à ce qu’elles soient réussies.</p></div><button class="btn" onclick="startErrors()">Refaire</button></div><div id="errorList"></div></div></section>
+<section id="saved" class="view hide"><div class="card"><h2>QCM sauvegardés</h2><p class="muted">Tu peux sauvegarder une session et la refaire plus tard.</p><div id="savedList"></div></div></section>
+<section id="stats" class="view hide"><div class="card"><h2>Statistiques</h2><div id="statsBody"></div><button class="btn danger" onclick="resetStats()">Réinitialiser les statistiques</button></div></section>
+</main>
+<script>
+const QUESTIONS = [{"id": 1, "chapter": "Agnosies visuelles", "source": "CT 2025-2026", "annale": true, "q": "Les agnosies visuelles associatives :", "opts": ["On retrouve une altération de la capacité à écrire/dessiner en copie", "On ne retrouve pas l’altération de la capacité à écrire/dessiner en copie", "Elles correspondent nécessairement à un déficit visuel primaire", "Elles empêchent toute reconnaissance dans les autres modalités sensorielles", "Aucune proposition n’est exacte"], "ans": [1], "exp": "Dans l’agnosie associative, la construction perceptive est suffisamment préservée pour permettre la copie. Le trouble porte sur l’accès à la signification à partir de l’entrée visuelle."}, {"id": 2, "chapter": "Physiologie visuelle", "source": "CT 2025-2026", "annale": true, "q": "L’aire visuelle secondaire V2 :", "opts": ["Est impliquée dans le traitement des informations visuelles relatives à l’orientation", "Est impliquée dans le traitement des informations visuelles relatives au mouvement", "Est impliquée dans le traitement des informations visuelles relatives à la profondeur", "Permet un traitement cognitif des informations et la perception des illusions visuelles", "Aucune proposition n’est exacte"], "ans": [0, 1, 2, 3], "exp": "Dans le cours, V2 participe au traitement de l’orientation, du mouvement et de la profondeur, ainsi qu’aux contours/illusions visuelles."}, {"id": 3, "chapter": "Agnosies spatiales", "source": "CT 2025-2026", "annale": true, "q": "Concernant les agnosies spatiales :", "opts": ["Elles correspondent à un trouble de l’exploration spatiale", "Elles correspondent à un trouble de la perception spatiale", "Elles correspondent à un trouble de la pensée spatiale", "Ce trouble s’apparente à une NSU", "Aucune proposition n’est exacte"], "ans": [1], "exp": "Le cours rattache les agnosies spatiales à un trouble de la perception spatiale. Elles ne doivent pas être confondues avec la négligence spatiale unilatérale."}, {"id": 4, "chapter": "Spécialisation hémisphérique", "source": "CT 2025-2026", "annale": true, "q": "La spécialisation fonctionnelle hémisphérique est plus nette chez les droitiers. Sur le plan fonctionnel :", "opts": ["L’hémisphère gauche est impliqué dans les activités de logique et de calcul", "L’hémisphère gauche est impliqué dans le traitement musical", "L’hémisphère droit est impliqué dans le traitement de l’information émotionnelle", "Le traitement de l’information par l’hémisphère droit est dit holistique", "Aucune des propositions n’est exacte"], "ans": [0, 2, 3], "exp": "À retenir : logique/calcul plutôt à gauche ; information émotionnelle et traitement holistique plutôt à droite."}, {"id": 5, "chapter": "Syndrome occipital", "source": "CM Syndrome occipital", "annale": false, "q": "À propos de l’hémianopsie latérale homonyme (HLH) :", "opts": ["Elle correspond à la perte de vision d’un seul œil", "Elle correspond à la perte de vision dans un hémichamp", "Elle affecte habituellement le même hémichamp visuel au niveau des deux yeux", "Elle constitue par définition une agnosie visuelle", "Aucune proposition n’est exacte"], "ans": [1, 2], "exp": "Le CM définit l’HLH comme une perte de vision dans un hémichamp, et non d’un seul œil ; le même hémichamp est touché dans les deux yeux."}, {"id": 6, "chapter": "Agnosies visuelles", "source": "CM Syndrome occipital", "annale": false, "q": "Concernant la classification de Lissauer (1890) :", "opts": ["Il distingue l’agnosie aperceptive et l’agnosie associative", "Il distingue trois formes principales d’agnosie aperceptive", "Il est à l’origine de la BORB", "Sa classification repose uniquement sur la prosopagnosie", "Aucune proposition n’est exacte"], "ans": [0], "exp": "Lissauer distingue deux grands types : aperceptif et associatif. La subdivision de l’aperceptif en forme, intégrative et transformation est attribuée à Humphreys & Riddoch."}, {"id": 7, "chapter": "Agnosies visuelles", "source": "CM Syndrome occipital", "annale": false, "q": "Humphreys & Riddoch (1987) proposent, parmi les agnosies aperceptives :", "opts": ["L’agnosie de la forme", "L’agnosie intégrative", "L’agnosie de transformation", "L’agnosie asémantique", "Aucune proposition n’est exacte"], "ans": [0, 1, 2], "exp": "Les trois sous-types aperceptifs cités sont : forme, intégrative et transformation. L’agnosie asémantique appartient aux agnosies associatives."}, {"id": 8, "chapter": "Agnosie de la forme", "source": "CM Syndrome occipital", "annale": false, "q": "Un patient présente une agnosie aperceptive de la forme. Quelles propositions sont compatibles avec le cours ?", "opts": ["La copie peut être déficitaire", "L’identification visuelle peut être déficitaire", "L’objet peut être reconnu lorsqu’il est palpé", "L’objet peut être reconnu s’il émet un bruit spécifique", "La copie doit nécessairement être parfaite"], "ans": [0, 1, 2, 3], "exp": "Le patient M (Benson & Greenberg, 1969) illustre une copie et une identification déficitaires. La reconnaissance peut redevenir possible par le toucher ou un bruit spécifique."}, {"id": 9, "chapter": "Agnosie de la forme", "source": "CM Syndrome occipital", "annale": false, "q": "Le patient M, cité dans le cours à propos de l’agnosie de la forme :", "opts": ["Est rapporté par Benson et Greenberg (1969)", "Présente une copie déficitaire", "Présente une identification déficitaire", "Présente une copie parfaitement préservée", "Aucune proposition n’est exacte"], "ans": [0, 1, 2], "exp": "Le CM cite le patient M de Benson et Greenberg (1969) : copie et identification sont déficitaires."}, {"id": 10, "chapter": "BORB", "source": "CM Syndrome occipital", "annale": false, "q": "La Birmingham Object Recognition Battery (BORB) est associée dans le cours à l’évaluation de :", "opts": ["La longueur", "L’orientation", "La taille", "La forme", "Uniquement la mémoire épisodique"], "ans": [0, 1, 2, 3], "exp": "Le cours associe explicitement la BORB à des traitements perceptifs portant notamment sur la longueur, l’orientation, la taille et la forme."}, {"id": 11, "chapter": "Agnosies associatives", "source": "CM Syndrome occipital", "annale": false, "q": "Parmi les sous-types d’agnosie associative présentés dans le cours, on retrouve :", "opts": ["L’agnosie par perte des représentations structurales", "L’agnosie asémantique", "L’agnosie intégrative", "L’agnosie de transformation", "Aucune proposition n’est exacte"], "ans": [0, 1], "exp": "Le CM distingue, dans les agnosies associatives, la perte des représentations structurales et l’agnosie asémantique."}, {"id": 12, "chapter": "Agnosies associatives", "source": "CM Syndrome occipital", "annale": false, "q": "Concernant la perte des représentations structurales stockées (RSS) :", "opts": ["Le cours oppose notamment mémoire et copie", "Des dessins de mémoire peuvent être utilisés dans l’évaluation", "De Renzi et Lucchelli (1993) sont cités", "Elle correspond nécessairement à une atteinte de V1", "Aucune proposition n’est exacte"], "ans": [0, 1, 2], "exp": "Le CM mentionne « mémoire vs copie » et des dessins de mémoire (parapluie, marteau, clef, poire), avec De Renzi et Lucchelli (1993)."}, {"id": 13, "chapter": "Agnosie asémantique", "source": "CM Syndrome occipital", "annale": false, "q": "Dans l’agnosie associative asémantique décrite dans le cours :", "opts": ["Le patient peut copier correctement un dessin", "Le patient peut être incapable de nommer visuellement l’objet copié", "Les connaissances sémantiques peuvent être évaluées par des appariements fonctionnels", "Le Pyramid and Palm Tree Test est cité", "La copie est toujours impossible"], "ans": [0, 1, 2, 3], "exp": "Le cours décrit une copie correcte avec impossibilité de nommer l’objet présenté visuellement, et cite les appariements fonctionnels/PEGV ainsi que le Pyramid and Palm Tree Test."}, {"id": 14, "chapter": "Agnosie asémantique", "source": "CM Syndrome occipital", "annale": false, "q": "Le Pyramid and Palm Tree Test :", "opts": ["Est cité pour l’évaluation des connaissances sémantiques", "Est associé à Howard & Patterson (1992)", "Évalue exclusivement l’acuité visuelle", "Est présenté dans la partie sur l’agnosie asémantique", "Aucune proposition n’est exacte"], "ans": [0, 1, 3], "exp": "Le test est cité dans la partie consacrée à l’évaluation des connaissances sémantiques de l’agnosie asémantique, avec Howard & Patterson (1992)."}, {"id": 15, "chapter": "Autres agnosies visuelles", "source": "CM Syndrome occipital", "annale": false, "q": "Parmi les autres types d’agnosies visuelles explicitement cités dans le cours :", "opts": ["Agnosies des couleurs", "Agnosies spatiales", "Prosopagnosie", "Aphasie de conduction", "Aucune proposition n’est exacte"], "ans": [0, 1, 2], "exp": "Le CM cite les agnosies des couleurs, les agnosies spatiales et la prosopagnosie."}, {"id": 16, "chapter": "Prosopagnosie", "source": "CM Syndrome occipital", "annale": false, "q": "Concernant l’évaluation de la prosopagnosie dans le cours :", "opts": ["Le test d’appariement des visages de Benton est cité", "Le Cambridge Face Memory Test est cité", "Le test d’orientation de lignes de Benton est le test spécifique des visages cité", "Le cas du Dr P. est cité", "Aucune proposition n’est exacte"], "ans": [0, 1, 3], "exp": "Le CM cite le test d’appariement des visages de Benton, le Cambridge Face Memory Test et le cas du Dr P. Le test d’orientation de lignes concerne les agnosies spatiales."}, {"id": 17, "chapter": "Agnosies spatiales", "source": "CM Syndrome occipital", "annale": false, "q": "Quel outil est explicitement cité pour l’évaluation des agnosies spatiales ?", "opts": ["Test d’orientation de lignes de Benton", "Cambridge Face Memory Test", "Pyramid and Palm Tree Test", "Stroop", "Aucune proposition n’est exacte"], "ans": [0], "exp": "Le test d’orientation de lignes de Benton est cité dans la partie consacrée aux agnosies spatiales."}, {"id": 18, "chapter": "Pièges agnosies", "source": "CM + révisions", "annale": false, "q": "Une mauvaise dénomination d’un objet présenté visuellement :", "opts": ["Prouve à elle seule une agnosie visuelle", "Peut nécessiter de distinguer un trouble de reconnaissance d’un trouble du langage", "Doit être interprétée avec les performances perceptives et sémantiques", "Implique nécessairement une agnosie aperceptive", "Aucune proposition n’est exacte"], "ans": [1, 2], "exp": "Une mauvaise dénomination ne suffit pas à conclure. Il faut déterminer si le problème concerne la perception/reconnaissance, l’accès sémantique ou la dénomination."}, {"id": 19, "chapter": "Pièges agnosies", "source": "CM + CT", "annale": false, "q": "Quelle(s) association(s) est/sont correcte(s) ?", "opts": ["Agnosie aperceptive → difficulté de construction perceptive", "Agnosie associative → difficulté d’accès à la signification à partir d’une perception suffisamment construite", "Agnosie intégrative → difficulté liée uniquement au point de vue", "Agnosie de transformation → sous-type associatif", "Aucune proposition n’est exacte"], "ans": [0, 1], "exp": "Aperceptive = construction perceptive ; associative = lien perception-signification. L’intégrative et la transformation sont classées parmi les aperceptives."}, {"id": 20, "chapter": "Pièges agnosies", "source": "CM Syndrome occipital", "annale": false, "q": "À propos de la copie dans les agnosies visuelles :", "opts": ["Une copie correcte est compatible avec une agnosie associative", "Une copie déficitaire est décrite chez le patient M présentant une agnosie de la forme", "Toute agnosie aperceptive entraîne exactement le même profil de copie", "La copie contribue au raisonnement diagnostique", "Aucune proposition n’est exacte"], "ans": [0, 1, 3], "exp": "La copie aide à distinguer les niveaux de traitement. Elle peut être préservée dans l’associative et est déficitaire chez le patient M dans l’agnosie de la forme ; les sous-types aperceptifs ne sont pas interchangeables."}];
+const LS="neuroqcm_v1";
+let db=JSON.parse(localStorage.getItem(LS)||'{"attempts":[],"errors":[],"saved":[]}');
+let session=[], idx=0, answers={}, sessionName="", errorMode=false;
+const save=()=>localStorage.setItem(LS,JSON.stringify(db));
+const letters=["A","B","C","D","E"];
+function eq(a,b){return JSON.stringify([...a].sort())===JSON.stringify([...b].sort())}
+function go(id){document.querySelectorAll(".view").forEach(x=>x.classList.add("hide"));document.getElementById(id).classList.remove("hide");document.querySelectorAll(".navbtn").forEach(x=>x.classList.toggle("active",x.dataset.view===id)); if(id==="errors") renderErrors(); if(id==="saved") renderSaved(); if(id==="stats") renderStats(); updateHome();}
+document.querySelectorAll(".navbtn").forEach(b=>b.onclick=()=>go(b.dataset.view));
+function setup(){
+ document.getElementById("nq").textContent=QUESTIONS.length;
+ [...new Set(QUESTIONS.map(q=>q.chapter))].sort().forEach(c=>{let o=document.createElement("option");o.value=c;o.textContent=c;chapter.appendChild(o)});
+ updateHome();
+}
+function updateHome(){
+ let all=db.attempts.flatMap(a=>a.items||[]), ok=all.filter(x=>x.ok).length;
+ seen.textContent=new Set(all.map(x=>x.id)).size; rate.textContent=all.length?Math.round(ok/all.length*100)+"%":"—";
+}
+function startQuiz(custom=null){
+ errorMode=false;
+ let pool=custom||QUESTIONS.filter(q=>(chapter.value==="all"||q.chapter===chapter.value)&&(mode.value==="all"||(mode.value==="annale"&&q.annale)||(mode.value==="course"&&!q.annale)));
+ if(!custom && shuffle.checked) pool=[...pool].sort(()=>Math.random()-.5);
+ if(!custom) pool=pool.slice(0,Math.min(+count.value,pool.length));
+ session=[...pool]; idx=0; answers={}; sessionName=`${chapter.value==="all"?"Neuropsy":chapter.value} — ${session.length} Q`;
+ runner.classList.remove("hide"); runner.scrollIntoView({behavior:"smooth"}); renderQ();
+}
+function startErrors(){
+ let ids=db.errors; let pool=QUESTIONS.filter(q=>ids.includes(q.id));
+ if(!pool.length){alert("Aucune erreur enregistrée pour le moment.");return}
+ go("quiz"); errorMode=true; session=pool.sort(()=>Math.random()-.5);idx=0;answers={};sessionName="Mes erreurs";runner.classList.remove("hide");renderQ();
+}
+function renderQ(){
+ if(idx>=session.length){finish();return}
+ let q=session[idx], chosen=answers[q.id]?.chosen||[];
+ runner.innerHTML=`<div class="card" style="margin-top:14px">
+ <div class="qhead"><div><span class="pill">${q.chapter}</span> ${q.annale?'<span class="pill annale">ANNAL / CT</span>':''}<h2>Q${idx+1}. ${q.q}</h2></div><b>${idx+1}/${session.length}</b></div>
+ <div class="progress"><div style="width:${(idx)/session.length*100}%"></div></div>
+ <p class="muted">Une ou plusieurs réponses peuvent être exactes.</p>
+ <div id="opts">${q.opts.map((o,i)=>`<label class="option"><input type="checkbox" value="${i}" ${chosen.includes(i)?"checked":""}> <b>${letters[i]}.</b> <span>${o}</span></label>`).join("")}</div>
+ <div id="fb"></div>
+ <div class="row space" style="margin-top:14px"><button class="btn secondary" onclick="saveCurrent()">Sauvegarder ce QCM</button><div class="row"><button class="btn secondary" ${idx===0?"disabled":""} onclick="idx--;renderQ()">Précédent</button><button class="btn" onclick="validateQ()">Valider</button></div></div>
+ </div>`;
+ if(answers[q.id]?.validated) showFeedback(q);
+}
+function validateQ(){
+ let q=session[idx], chosen=[...document.querySelectorAll("#opts input:checked")].map(x=>+x.value);
+ let ok=eq(chosen,q.ans); answers[q.id]={chosen,ok,validated:true};
+ if(ok) db.errors=db.errors.filter(id=>id!==q.id); else if(!db.errors.includes(q.id)) db.errors.push(q.id);
+ save(); showFeedback(q);
+}
+function showFeedback(q){
+ let a=answers[q.id], labels=document.querySelectorAll(".option");
+ labels.forEach((el,i)=>{el.classList.remove("correct","wrong"); if(q.ans.includes(i))el.classList.add("correct"); else if(a.chosen.includes(i))el.classList.add("wrong"); el.querySelector("input").disabled=true});
+ fb.innerHTML=`<div class="feedback ${a.ok?"ok":"bad"}"><b>${a.ok?"✓ Correct":"✗ À revoir"}</b><br>${q.exp}<br><small>Source : ${q.source}</small></div>
+ <div class="row" style="margin-top:10px"><button class="btn" onclick="idx++;renderQ()">${idx===session.length-1?"Terminer":"Question suivante"}</button></div>`;
+}
+function finish(){
+ let items=session.map(q=>({id:q.id,ok:!!answers[q.id]?.ok,chosen:answers[q.id]?.chosen||[]}));
+ let score=items.filter(x=>x.ok).length;
+ db.attempts.push({date:new Date().toISOString(),name:sessionName,score,total:session.length,items});save();
+ runner.innerHTML=`<div class="card" style="margin-top:14px"><h2>Résultat : ${score}/${session.length}</h2><div class="progress"><div style="width:${score/session.length*100}%"></div></div><p>${Math.round(score/session.length*100)} % de bonnes réponses.</p><div class="row"><button class="btn" onclick="startQuiz(session)">Refaire ce QCM</button><button class="btn secondary" onclick="saveSession(session)">Sauvegarder</button><button class="btn secondary" onclick="startErrors()">Refaire mes erreurs</button></div></div>`;
+ updateHome();
+}
+function saveCurrent(){saveSession(session)}
+function saveSession(arr){
+ let name=prompt("Nom du QCM :",sessionName)||sessionName;
+ db.saved.push({id:Date.now(),name,ids:arr.map(q=>q.id),date:new Date().toISOString()});save();alert("QCM sauvegardé.");
+}
+function renderErrors(){
+ let qs=QUESTIONS.filter(q=>db.errors.includes(q.id));
+ errorList.innerHTML=qs.length?qs.map(q=>`<div class="savedItem"><b>Q${q.id} — ${q.chapter}</b><div>${q.q}</div></div>`).join(""):'<p class="muted">Aucune erreur enregistrée.</p>';
+}
+function renderSaved(){
+ savedList.innerHTML=db.saved.length?db.saved.map(s=>`<div class="savedItem row space"><div><b>${s.name}</b><div class="muted">${s.ids.length} questions • ${new Date(s.date).toLocaleDateString("fr-FR")}</div></div><div class="row"><button class="btn" onclick="redoSaved(${s.id})">Refaire</button><button class="btn danger" onclick="delSaved(${s.id})">Supprimer</button></div></div>`).join(""):'<p class="muted">Aucun QCM sauvegardé.</p>';
+}
+function redoSaved(id){let s=db.saved.find(x=>x.id===id);go("quiz");startQuiz(s.ids.map(id=>QUESTIONS.find(q=>q.id===id)).filter(Boolean))}
+function delSaved(id){db.saved=db.saved.filter(x=>x.id!==id);save();renderSaved()}
+function renderStats(){
+ let at=[...db.attempts].reverse(), all=at.flatMap(a=>a.items||[]), ok=all.filter(x=>x.ok).length;
+ statsBody.innerHTML=`<div class="grid"><div class="stat"><span class="muted">Sessions</span><b>${at.length}</b></div><div class="stat"><span class="muted">Réponses</span><b>${all.length}</b></div><div class="stat"><span class="muted">Réussite</span><b>${all.length?Math.round(ok/all.length*100):0}%</b></div></div><h3>Historique</h3>${at.length?at.slice(0,20).map(a=>`<div class="savedItem row space"><span>${a.name}<br><small class="muted">${new Date(a.date).toLocaleString("fr-FR")}</small></span><b>${a.score}/${a.total}</b></div>`).join(""):'<p class="muted">Pas encore de tentative.</p>'}`;
+}
+function resetStats(){if(confirm("Effacer l’historique et les erreurs ? Les QCM sauvegardés seront conservés.")){db.attempts=[];db.errors=[];save();renderStats();updateHome()}}
+setup();
+</script>
+</body></html>
