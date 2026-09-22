@@ -124,6 +124,8 @@ body{background:linear-gradient(180deg,#f8fbfb 0,#f3f8f8 45%,#eef6f5 100%)}
 .anchorTrack{height:9px;background:#e9efef;border-radius:999px;overflow:hidden}.anchorTrack i{display:block;height:100%;background:var(--t);border-radius:999px}
 .qcmHubNote{padding:12px 14px;border-radius:14px;background:#f3f8f7;border:1px solid var(--line);margin:10px 0}
 @media(max-width:700px){.wbColumns{grid-template-columns:1fr}.event{font-size:9px!important;padding:4px!important}}
+
+.homeQuote{font-size:12px;font-style:italic;color:#71807f;margin:5px 0 11px;letter-spacing:.01em;font-weight:500}
 </style>
 </head><body><div id="authGate" class="authGate"><div class="authCard"><div class="ey">ESPACE SÉCURISÉ</div><h1>Connexion à SYFAXA</h1><p class="mut">Connecte-toi avec ton compte Firebase pour retrouver tes données sur tes appareils.</p><input id="loginEmail" type="email" placeholder="Adresse e-mail" autocomplete="username"><input id="loginPassword" type="password" placeholder="Mot de passe" autocomplete="current-password"><button id="loginBtn" class="btn" style="width:100%;margin-top:12px">Se connecter</button><div id="authMsg" class="authMsg"></div></div></div><div class="app">
 <aside class="side"><div class="brand">SYFAXA<small>ESPACE DE RÉVISION</small></div><nav class="nav"><div class="sectionLabel">ESPACE</div>
@@ -132,7 +134,7 @@ body{background:linear-gradient(180deg,#f8fbfb 0,#f3f8f8 45%,#eef6f5 100%)}
 
 <section id="home" class="view on">
  <div class="shotHero">
-  <div><div class="shotEy">Tableau de bord</div><h1 id="hello">Bonjour Faty</h1><p>Une seule plateforme pour tes cours, tes entraînements et tes annales.</p>
+  <div><div class="shotEy">Tableau de bord</div><h1 id="hello">Bonjour Faty</h1><div class="homeQuote">« Un jour à la fois, mais jamais au hasard. »</div><p>Une seule plateforme pour tes cours, tes entraînements et tes annales.</p>
    <div class="actions" style="margin-top:22px"><button class="btn" onclick="show('subjects')">Accéder à mes cours</button><button class="btn soft" style="background:#fff;border:1px solid #cfe4e2" onclick="show('qcm')">Commencer un QCM</button></div>
   </div>
   <div class="shotStats"><div class="shotStat"><span>Questions vues</span><b id="shotSeen">0</b></div><div class="shotStat"><span>Réussite</span><b id="shotRate">—</b></div><div class="shotStat"><span>Erreurs à revoir</span><b id="shotErrors">0</b></div><div class="shotStat"><span>Sessions</span><b id="shotSessions">0</b></div></div>
@@ -757,4 +759,58 @@ function renderCalendarV11(){cal11Ensure();let root=document.getElementById('cal
 renderCalendar=renderCalendarV11;
 </script>
 
+
+<style id="syfaxa-home-v16-css">
+/* SYFAXA V16 — accueil personnel, volontairement distinct du dashboard historique */
+#home{max-width:1180px;margin:0 auto;padding-bottom:48px}
+#home>.shotHero,#home>#v8Today,#home>.prepaTodayBanner,#home>.shotStats,#home>.shotSection,#home>.shotTwo,#home>.shotBottom,#home>.homePerformance{display:none!important}
+.home16{font-family:Arial,sans-serif;color:#173d3c}.home16 *{box-sizing:border-box}
+.h16-head{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 2px 22px;border-bottom:1px solid #e7efee;margin-bottom:26px}
+.h16-kicker{font-size:12px;font-weight:800;letter-spacing:.12em;color:#7d8b8a;text-transform:uppercase}.h16-head h1{font-size:34px;letter-spacing:-1.2px;margin:5px 0 4px;color:#163f3d}.h16-date{color:#7a8988;font-size:14px}.h16-quote{font-size:13px;font-style:italic;color:#879392;margin-top:8px}.h16-headActions{display:flex;gap:8px}
+.h16-btn{border:0;border-radius:12px;padding:11px 15px;font-weight:800;cursor:pointer;background:#153f3d;color:#fff}.h16-btn.alt{background:#eef8f6;color:#23625e}.h16-btn.ghost{background:#fff;color:#4f6260;border:1px solid #dfe9e7}.h16-btn.small{padding:8px 11px;font-size:12px;border-radius:10px}
+.h16-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.75fr);gap:24px;margin-bottom:34px}.h16-block{border-top:2px solid #173f3d;padding-top:14px}.h16-sectionTitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.h16-sectionTitle h2{font-size:18px;margin:0;color:#173f3d}.h16-link{border:0;background:none;color:#3d7772;font-weight:800;cursor:pointer;font-size:13px}
+.h16-day{background:#f8fbfa;border:1px solid #e5edeb;border-radius:18px;padding:8px 18px}.h16-task{display:grid;grid-template-columns:76px 1fr auto;gap:13px;align-items:center;padding:15px 0;border-bottom:1px solid #e7eeec}.h16-task:last-child{border-bottom:0}.h16-time{font-weight:800;color:#49605e;font-size:13px}.h16-task b{font-size:14px}.h16-task .meta{font-size:12px;color:#82908f;margin-top:4px}.h16-empty{padding:28px 4px;color:#7c8988}.h16-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px}
+.h16-focus{background:#173f3d;color:#fff;border-radius:18px;padding:22px}.h16-focus .h16-kicker{color:#9fded7}.h16-focus h2{font-size:24px;margin:8px 0 5px;color:#fff}.h16-focus p{color:#c9dbd8;font-size:13px;line-height:1.45}.h16-focus .h16-btn{background:#8ddbd2;color:#153f3d;width:100%;margin-top:12px}.h16-minirow{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:13px}.h16-minirow:last-of-type{border-bottom:0}
+.h16-subjects{margin-bottom:34px}.h16-subjectList{border-top:1px solid #dfe8e6}.h16-subject{display:grid;grid-template-columns:minmax(190px,1fr) minmax(180px,1.1fr) 76px 115px 28px;gap:16px;align-items:center;padding:16px 3px;border-bottom:1px solid #e6eeec;cursor:pointer}.h16-subject:hover{background:#fafcfb}.h16-subjectName{font-weight:800;font-size:14px}.h16-subjectMeta{font-size:12px;color:#82908f;margin-top:3px}.h16-progress{height:6px;border-radius:10px;background:#e8efed;overflow:hidden}.h16-progress i{display:block;height:100%;border-radius:10px;background:#81d8d0}.h16-pct{font-weight:900;font-size:13px}.h16-due{font-size:12px;color:#6d7c7a;text-align:right}.h16-arrow{font-size:18px;color:#9aabaa}
+.h16-lower{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:30px}.h16-list{border-top:1px solid #dfe8e6}.h16-item{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:14px 2px;border-bottom:1px solid #e7eeec}.h16-item b{font-size:13px}.h16-item .meta{font-size:12px;color:#879391;margin-top:3px}.h16-prio{display:flex;align-items:center;gap:9px}.h16-badge{font-size:11px;font-weight:900;border-radius:999px;padding:5px 8px;background:#fff1ee;color:#b75a4a}.h16-badge.orange{background:#fff6df;color:#a36f18}
+.h16-week{border-top:1px solid #dfe8e6;display:grid;grid-template-columns:repeat(7,1fr);gap:0}.h16-weekDay{padding:14px 8px;border-right:1px solid #edf1f0;min-height:76px}.h16-weekDay:last-child{border-right:0}.h16-weekDay strong{font-size:11px;color:#748381}.h16-weekDay span{display:block;font-size:12px;margin-top:10px;font-weight:800}.h16-weekDay.today{background:#f0faf8}.h16-weekDay.today strong{color:#317a73}
+@media(max-width:900px){.h16-grid,.h16-lower{grid-template-columns:1fr}.h16-subject{grid-template-columns:1fr 100px 55px 26px}.h16-subject .h16-due{display:none}.h16-head{align-items:flex-start}.h16-headActions{display:none}}
+@media(max-width:620px){#home{padding-left:2px;padding-right:2px}.h16-head h1{font-size:29px}.h16-task{grid-template-columns:55px 1fr}.h16-task .h16-btn{grid-column:2}.h16-subject{grid-template-columns:1fr 70px 24px}.h16-subject .h16-progress{display:none}.h16-week{overflow-x:auto;grid-template-columns:repeat(7,90px)}}
+</style>
+<script id="syfaxa-home-v16-js">
+(function(){
+ function h16Date(d){return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
+ function h16ISO(d){return d.toISOString().slice(0,10)}
+ function h16SubName(s){return s.name.replace('Psychologie du développement de l’enfant','Développement de l’enfant').replace('Psychologie du développement de l’adulte','Développement de l’adulte')}
+ function h16Color(id){return ({neuro:'#7667d8',child:'#e58a55',adult:'#d66e98',stats:'#4e9f75',culture:'#4c8ec9'})[id]||'#81d8d0'}
+ function h16Mastery(sid){
+   try{let qs=questions().filter(q=>(q.subject||'neuro')===sid);if(!qs.length)return 0;let pts=0;qs.forEach(q=>{let st=(db.qStatus||{})[q.id];pts+=st==='green'?1:st==='orange'?.55:st==='red'?.15:0});return Math.round(100*pts/qs.length)}catch(e){return 0}
+ }
+ function h16TodayEvents(){let t=h16ISO(new Date());return (db.events||[]).filter(e=>e.date===t&&!e.done).sort((a,b)=>(a.time||'23:59').localeCompare(b.time||'23:59'))}
+ function h16StartEvent(id){let e=(db.events||[]).find(x=>x.id===id);if(e&&e.subject&&e.course){try{quizFor(e.subject,e.course);return}catch(_){}} show('calendar')}
+ window.renderHome=function(){
+   let home=document.getElementById('home');if(!home)return;
+   let old=document.getElementById('home16');if(old)old.remove();
+   let now=new Date(),today=h16ISO(now),ev=h16TodayEvents(),subs=subjects();
+   let red=Object.values(db.qStatus||{}).filter(x=>x==='red').length, orange=Object.values(db.qStatus||{}).filter(x=>x==='orange').length;
+   let results=db.results||[],avg=results.length?Math.round(results.slice(-20).reduce((a,r)=>a+(+r.score||0),0)/Math.min(20,results.length)):0;
+   let next=ev[0];
+   let subjRows=subs.map(s=>{let m=h16Mastery(s.id),due=(db.events||[]).filter(e=>e.subject===s.id&&e.date<=today&&!e.done).length;return `<div class="h16-subject" onclick="openMatter('${s.id}')"><div><div class="h16-subjectName"><i class="h16-dot" style="background:${h16Color(s.id)}"></i>${esc(h16SubName(s))}</div><div class="h16-subjectMeta">${s.courses.length} support${s.courses.length>1?'s':''} disponible${s.courses.length>1?'s':''}</div></div><div class="h16-progress"><i style="width:${m}%"></i></div><div class="h16-pct">${m}%</div><div class="h16-due">${due?due+' à faire':'À jour'}</div><div class="h16-arrow">›</div></div>`}).join('');
+   let taskRows=ev.length?ev.slice(0,5).map(e=>{let sid=e.subject||'',sn=subs.find(s=>s.id===sid);return `<div class="h16-task"><div class="h16-time">${esc(e.time||e.j||'À faire')}</div><div><b><i class="h16-dot" style="background:${h16Color(sid)}"></i>${esc(e.title||e.short||'Séance')}</b><div class="meta">${esc(sn?h16SubName(sn):(e.subject||''))}${e.duration?' · '+e.duration+' min':''}${e.j?' · '+e.j:''}</div></div><button class="h16-btn ghost small" onclick="event.stopPropagation();h16StartEvent('${e.id||''}')">Ouvrir</button></div>`}).join(''):`<div class="h16-empty"><b>Rien d’imposé aujourd’hui.</b><br><span style="font-size:13px">Tu peux lancer une série courte ou ajouter une séance au calendrier.</span></div>`;
+   let priorities=[];if(red)priorities.push(['red',`${red} question${red>1?'s':''} non maîtrisée${red>1?'s':''}`,'Erreurs à reprendre']);if(orange)priorities.push(['orange',`${orange} question${orange>1?'s':''} presque maîtrisée${orange>1?'s':''}`,'À consolider']);let overdue=(db.events||[]).filter(e=>e.date<today&&!e.done).length;if(overdue)priorities.push(['red',`${overdue} séance${overdue>1?'s':''} en retard`,'Planning']);
+   let prioHTML=priorities.length?priorities.slice(0,4).map((p,i)=>`<div class="h16-item"><div class="h16-prio"><span class="h16-badge ${p[0]==='orange'?'orange':''}">${p[0]==='red'?'PRIORITÉ':'À CONSOLIDER'}</span><div><b>${esc(p[1])}</b><div class="meta">${esc(p[2])}</div></div></div><button class="h16-btn ghost small" onclick="show('${i===2?'calendar':'errors'}')">Travailler</button></div>`).join(''):`<div class="h16-empty">Aucune priorité urgente détectée.</div>`;
+   let week=[];let monday=new Date(now);monday.setDate(now.getDate()-((now.getDay()+6)%7));for(let i=0;i<7;i++){let d=new Date(monday);d.setDate(monday.getDate()+i);let iso=h16ISO(d),n=(db.events||[]).filter(e=>e.date===iso).length,done=(db.events||[]).filter(e=>e.date===iso&&e.done).length;week.push(`<div class="h16-weekDay ${iso===today?'today':''}"><strong>${d.toLocaleDateString('fr-FR',{weekday:'short'}).replace('.','').toUpperCase()} ${d.getDate()}</strong><span>${n?done+'/'+n+' faites':'—'}</span></div>`)}
+   let box=document.createElement('div');box.id='home16';box.className='home16';box.innerHTML=`
+    <header class="h16-head"><div><div class="h16-kicker">Mon espace de travail</div><h1>Bonjour ${esc(db.settings.name||'Faty')}</h1><div class="h16-date">${h16Date(now)}</div><div class="h16-quote">« Un jour à la fois, mais jamais au hasard. »</div></div><div class="h16-headActions"><button class="h16-btn ghost" onclick="show('calendar')">Calendrier</button><button class="h16-btn" onclick="smartSession()">Lancer une session</button></div></header>
+    <div class="h16-grid"><section class="h16-block"><div class="h16-sectionTitle"><h2>Ta journée</h2><button class="h16-link" onclick="show('calendar')">Voir le calendrier →</button></div><div class="h16-day">${taskRows}</div></section>
+    <aside class="h16-focus"><div class="h16-kicker">PROCHAINE ACTION</div><h2>${next?esc(next.title||next.short||'Séance prévue'):'Série du jour'}</h2><p>${next?'Ta prochaine séance est prête. Ouvre-la quand tu veux commencer.':'10 questions ciblées pour entretenir tes acquis sans choisir toi-même le chapitre.'}</p><div class="h16-minirow"><span>Moyenne récente</span><b>${results.length?avg+' %':'—'}</b></div><div class="h16-minirow"><span>À consolider</span><b>${orange+red}</b></div><button class="h16-btn" onclick="${next?`h16StartEvent('${next.id||''}')`:'smartSession()'}">${next?'Commencer':'Lancer 10 questions'} →</button></aside></div>
+    <section class="h16-subjects"><div class="h16-sectionTitle"><h2>Mes matières</h2><button class="h16-link" onclick="show('program')">Voir tout le programme →</button></div><div class="h16-subjectList">${subjRows}</div></section>
+    <div class="h16-lower"><section class="h16-block"><div class="h16-sectionTitle"><h2>Mes priorités</h2><button class="h16-link" onclick="show('errors')">Toutes mes erreurs →</button></div><div class="h16-list">${prioHTML}</div></section><section class="h16-block"><div class="h16-sectionTitle"><h2>Cette semaine</h2><button class="h16-link" onclick="show('calendar')">Planning →</button></div><div class="h16-week">${week.join('')}</div></section></div>`;
+   home.prepend(box);
+ };
+ window.h16StartEvent=h16StartEvent;
+ window.prepaPolishHome=function(){};
+ setTimeout(()=>{try{renderHome()}catch(e){console.error('SYFAXA Home V16',e)}},0);
+})();
+</script>
 </body></html>
