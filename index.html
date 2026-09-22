@@ -845,4 +845,45 @@ renderCalendar=renderCalendarV11;
  setTimeout(()=>{try{renderHome()}catch(e){console.error('HOME V17',e)}},0)
 })();
 </script>
-</body></html>
+
+<script id="syfaxa-qcm-v20-touch-fix">
+/* V20 — QCM touch fix: avoid the same tap being handled twice.
+   QCM options previously had BOTH inline onclick and delegated click listeners,
+   so a tap could select then immediately unselect the answer. */
+(function(){
+  const previousRenderQ = window.renderQ;
+  window.renderQ = function(){
+    previousRenderQ();
+    const quizBox=document.getElementById('quiz');
+    if(!quizBox) return;
+    quizBox.querySelectorAll('#opts .qopt').forEach(function(opt){
+      opt.removeAttribute('onclick');
+      opt.removeAttribute('onkeydown');
+      opt.style.cursor='pointer';
+      opt.style.touchAction='manipulation';
+      opt.style.webkitTapHighlightColor='rgba(32,184,174,.12)';
+    });
+    /* If this quiz node was recreated, bind one delegated handler only. */
+    if(!quizBox.dataset.bound){
+      syfaxaBindInteractions();
+    }
+  };
+})();
+</script>
+</body></html><style id="syfaxa-v19-tiffany-hero">
+/* V19 — bandeau accueil Tiffany franc, non pastel */
+#home17 .h17-hero{
+  background:#20B8AE !important;
+  border-color:#159D95 !important;
+  box-shadow:0 14px 34px rgba(18,137,129,.18) !important;
+}
+#home17 .h17-hero:after{background:rgba(255,255,255,.10) !important}
+#home17 .h17-hero .h17-ey,
+#home17 .h17-hero h1,
+#home17 .h17-hero .h17-date,
+#home17 .h17-hero .h17-quote{color:#fff !important}
+#home17 .h17-hero .h17-date{opacity:.88}
+#home17 .h17-hero .h17-quote{opacity:.94}
+#home17 .h17-hero .h17-btn{background:#fff !important;color:#137F79 !important;box-shadow:none !important}
+#home17 .h17-hero .h17-btn.light{background:rgba(255,255,255,.18) !important;color:#fff !important;border:1px solid rgba(255,255,255,.48) !important;backdrop-filter:blur(8px)}
+</style>
