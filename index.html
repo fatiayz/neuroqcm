@@ -732,7 +732,20 @@ function cal11Today(){cal11Date=new Date();renderCalendar()}
 function cal11Open(date,time){let m=document.getElementById('cal11Modal');if(!m)return;document.getElementById('cal11Date').value=date||cal11ISO(new Date());document.getElementById('cal11Time').value=time||'18:00';let ss=document.getElementById('cal11Sub');ss.innerHTML=subjects().map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');cal11FillCourses();m.classList.add('on')}
 function cal11FillCourses(){let sid=document.getElementById('cal11Sub').value,s=subjects().find(x=>x.id===sid),cc=document.getElementById('cal11Course');cc.innerHTML=(s?.courses||[]).filter(c=>!['FICHES','ANNALES'].includes(c.code)).map(c=>`<option value="${c.id}">${esc(c.code)} — ${esc(c.title)}</option>`).join('')}
 function cal11Close(){document.getElementById('cal11Modal')?.classList.remove('on')}
-function cal11Save(){let sid=cal11Sub.value,s=subjects().find(x=>x.id===sid),cid=cal11Course.value,c=s?.courses.find(x=>x.id===cid);if(!s||!c)return;let base={id:'cal11_'+Date.now(),date:cal11DateInput.value,time:cal11Time.value,duration:+cal11DurationInput.value||30,type:cal11Type.value,subject:sid,course:cid,short:c.code,title:c.title,done:false,anchor:0,j:''};db.events.push(base);if(cal11Spaced.checked){[['J1',1],['J3',3],['J7',7],['J14',14]].forEach(([j,n],i)=>{let d=new Date(base.date+'T12:00:00');d.setDate(d.getDate()+n);db.events.push({...base,id:base.id+'_'+i,date:cal11ISO(d),j,type:'review',time:base.time})})}save();cal11Close();renderCalendar()}
+function cal11Save(){
+  const subEl=document.getElementById('cal11Sub'), courseEl=document.getElementById('cal11Course'), dateEl=document.getElementById('cal11Date'), timeEl=document.getElementById('cal11Time'), durEl=document.getElementById('cal11DurationInput'), typeEl=document.getElementById('cal11Type'), spacedEl=document.getElementById('cal11Spaced');
+  if(!subEl||!courseEl||!dateEl||!timeEl||!durEl||!typeEl)return alert('Le formulaire du planning ne s\'est pas chargé correctement.');
+  let sid=subEl.value,s=subjects().find(x=>x.id===sid),cid=courseEl.value,c=s?.courses.find(x=>x.id===cid);
+  if(!dateEl.value)return alert('Choisis une date.');
+  if(!timeEl.value)return alert('Choisis une heure.');
+  if(!s)return alert('Choisis une matière.');
+  if(!c)return alert('Choisis un CM / support.');
+  cal11Ensure();
+  let base={id:'cal11_'+Date.now(),date:dateEl.value,time:timeEl.value,duration:Number(durEl.value)||30,type:typeEl.value,subject:sid,course:cid,short:c.code,title:c.title,done:false,anchor:0,j:''};
+  db.events.push(base);
+  if(spacedEl?.checked){[['J1',1],['J3',3],['J7',7],['J14',14]].forEach(([j,n],i)=>{let d=new Date(base.date+'T12:00:00');d.setDate(d.getDate()+n);db.events.push({...base,id:base.id+'_'+i,date:cal11ISO(d),j,type:'review',time:base.time})})}
+  save();cal11Close();cal11Date=new Date(base.date+'T12:00:00');renderCalendar();
+}
 function cal11Toggle(id){let e=db.events.find(x=>String(x.id)===String(id));if(!e)return;e.done=!e.done;if(e.done&&e.type==='review'&&!e.anchor)e.anchor=100;save();renderCalendar()}
 function cal11Delete(id){if(!confirm('Supprimer cet élément du planning ?'))return;db.events=db.events.filter(x=>String(x.id)!==String(id));save();renderCalendar()}
 function cal11TaskHTML(e){let sid=cal11Subject(e),sc=SUBJECT_COLORS[sid]||'#81d8d0';return `<div class="cal11-task"><i class="cal11-dot" style="background:${sc}"></i><div style="flex:1"><b>${esc(e.short||'')} · ${esc(e.title||'')}</b><small>${esc(cal11EventTime(e))} · ${cal11Duration(e)} min · ${esc(e.j||cal11LabelType(e.type))}</small></div><button class="btn soft" style="padding:5px 7px" onclick="cal11Toggle('${e.id}')">${e.done?'↶':'✓'}</button></div>`}
