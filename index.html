@@ -1550,3 +1550,44 @@ window.v32OpenAnnot=async function(sid,cid,i){try{if(typeof v32CloseDialog==='fu
 window.v32CloseAnnot=()=>{let h=document.getElementById('v37Annot');if(h)h.style.display='none';V.pdf=null};
 })();
 </script>
+
+<!-- SYFAXA V38.1 — suppression des feuilles ajoutées -->
+<style id="syfaxa-v381-delete-sheet-css">
+.v381-del-sheet{position:absolute;left:10px;bottom:9px;z-index:12;border:1px solid #efcaca;background:#fff8f8;color:#a33b3b;border-radius:10px;padding:5px 9px;font:700 11px inherit;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 7px #0001}
+.v381-del-sheet:active{transform:scale(.98)}
+</style>
+<script id="syfaxa-v381-delete-sheet-js">
+(()=>{
+function v381Save(){try{save()}catch(e){try{localStorage.setItem('syfaxa_db',JSON.stringify(db))}catch(_){}}}
+window.v381DeleteAddedSheet=async function(btn){
+  const el=btn?.closest('.v37sheet');
+  if(!el)return;
+  const id=(el.dataset.key||'').replace(/^virtual\|/,'');
+  const after=el.dataset.sheetAfter;
+  if(!id||after==null)return;
+  if(!confirm('Supprimer cette feuille ajoutée ? Les annotations présentes sur cette feuille seront également supprimées.'))return;
+  try{
+    const s=sheets37();
+    const arr=s[after]||[];
+    const idx=arr.findIndex(x=>x.id===id);
+    if(idx>=0)arr.splice(idx,1);
+    if(!arr.length)delete s[after];
+    const annKey=annKey37(el);
+    if(db.annotations)delete db.annotations[annKey];
+    v381Save();
+    el.remove();
+  }catch(e){console.error(e);alert('Impossible de supprimer cette feuille.');}
+};
+const mo=new MutationObserver(()=>{
+  document.querySelectorAll('#v37Doc .v37sheet').forEach(el=>{
+    if(el.querySelector('.v381-del-sheet'))return;
+    const b=document.createElement('button');
+    b.type='button';b.className='v381-del-sheet';b.textContent='🗑 Supprimer cette page';
+    b.onclick=e=>{e.preventDefault();e.stopPropagation();v381DeleteAddedSheet(b)};
+    el.appendChild(b);
+  });
+});
+function start(){const root=document.getElementById('v37Doc');if(root){mo.observe(root,{childList:true,subtree:true});root.querySelectorAll('.v37sheet').forEach(el=>{if(!el.querySelector('.v381-del-sheet')){const b=document.createElement('button');b.type='button';b.className='v381-del-sheet';b.textContent='🗑 Supprimer cette page';b.onclick=e=>{e.preventDefault();e.stopPropagation();v381DeleteAddedSheet(b)};el.appendChild(b)}})}else setTimeout(start,250)}
+start();
+})();
+</script>
