@@ -963,7 +963,30 @@ const rh35=window.renderHome;window.renderHome=function(){rh35();setTimeout(v35P
 setTimeout(()=>{try{if(document.getElementById('home')?.classList.contains('on'))v35Postit()}catch(e){}},100);
 })();
 </script>
-</body></html><style id="syfaxa-v19-tiffany-hero">
+\n<!-- SYFAXA V38 — POST-IT ACCUEIL -->\n<style id="syfaxa-v38-postit-css">\n#home .v38-home-memo-row{display:grid;grid-template-columns:minmax(0,1fr) 255px;gap:18px;align-items:start;margin:18px 0 22px}\n#home .v38-home-memo-spacer{min-height:1px}\n#home #v35Postit.v35-postit{position:relative!important;right:auto!important;top:auto!important;width:100%!important;min-height:190px;margin:0!important;z-index:1!important;transform:rotate(.5deg);box-sizing:border-box}\n@media(max-width:900px){#home .v38-home-memo-row{grid-template-columns:1fr}#home .v38-home-memo-spacer{display:none}#home #v35Postit.v35-postit{max-width:100%;transform:none}}\n</style>\n<script id="syfaxa-v38-postit-js">
+(function(){
+ function mountPostitV38(){
+  const home=document.getElementById('home'); if(!home)return;
+  let p=document.getElementById('v35Postit');
+  if(!p && typeof window.v35Postit==='function'){try{window.v35Postit();p=document.getElementById('v35Postit')}catch(e){}}
+  if(!p)return;
+  let row=home.querySelector('.v38-home-memo-row');
+  if(!row){
+   row=document.createElement('div'); row.className='v38-home-memo-row';
+   row.innerHTML='<div class="v38-home-memo-spacer"></div><div class="v38-home-post-slot"></div>';
+   const vh=home.querySelector('.v28-home')||home;
+   const grids=vh.querySelectorAll('.v28-grid');
+   const anchor=grids.length?grids[0]:vh.firstElementChild;
+   if(anchor&&anchor.parentNode)anchor.insertAdjacentElement('afterend',row);else vh.appendChild(row);
+  }
+  row.querySelector('.v38-home-post-slot').appendChild(p);
+ }
+ window.mountPostitV38=mountPostitV38;
+ const prev=window.renderHome; if(typeof prev==='function')window.renderHome=function(){prev.apply(this,arguments);setTimeout(mountPostitV38,30)};
+ const prevShow=window.show; if(typeof prevShow==='function')window.show=function(id){prevShow.apply(this,arguments);if(id==='home')setTimeout(mountPostitV38,50)};
+ setTimeout(mountPostitV38,180);
+})();
+</script>\n</body></html><style id="syfaxa-v19-tiffany-hero">
 /* V19 — bandeau accueil Tiffany franc, non pastel */
 #home17 .h17-hero{
   background:#20B8AE !important;
