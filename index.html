@@ -916,7 +916,54 @@ renderCalendar=renderCalendarV21;
 \n<script id="syfaxa-qa-v27-js">
 /* V28: TD Neuropsychologie fait maintenant partie des cours Neuro.
    Les TD1/TD2 restent sélectionnables séparément et peuvent aussi entrer dans une session Neuro globale. */
-</script>\n</body></html><style id="syfaxa-v19-tiffany-hero">
+</script>\n
+
+<!-- SYFAXA V35 FLASHCARDS + PALETTES + HOME POST-IT -->
+<style id="syfaxa-v35-css">
+.v35-color-custom{width:30px!important;height:30px!important;padding:2px!important;border-radius:9px!important;border:1px solid #cbdedc!important;background:#fff!important}
+.v35-postit{position:absolute;right:22px;top:118px;width:245px;min-height:190px;background:#fff3a8;border:1px solid #eadb72;border-radius:6px 6px 18px 6px;padding:17px 16px 14px;box-shadow:0 10px 28px #5d51201c;transform:rotate(1deg);z-index:4}
+.v35-postit:before{content:'';position:absolute;width:72px;height:18px;background:#ffffff88;top:-8px;left:84px;transform:rotate(-2deg);box-shadow:0 1px 2px #0001}.v35-postit h3{margin:2px 0 8px;font-size:16px;color:#5c5220}.v35-postit textarea{width:100%;min-height:122px;resize:none;border:0;outline:0;background:transparent;font:600 14px/1.55 inherit;color:#554d28;padding:0}.v35-postit small{display:block;text-align:right;color:#8b7d3b;font-size:10px;margin-top:4px}
+#home{position:relative}.v35-flash-back{margin-bottom:12px}
+@media(max-width:1100px){.v35-postit{position:relative;right:auto;top:auto;width:auto;min-height:150px;margin:14px 18px;transform:none}.v35-postit textarea{min-height:90px}}
+</style>
+<script id="syfaxa-v35-js">
+(()=>{
+// 1) Annotation palettes: presets + exact custom colour for pen and highlighter.
+function v35EnhancePalette(){
+ const pp=document.getElementById('v34PenPalette'), hp=document.getElementById('v34HighPalette');
+ if(pp&&!pp.querySelector('.v35-color-custom')) pp.insertAdjacentHTML('beforeend',`<input class="v35-color-custom" type="color" value="${A.penColor||'#173f3d'}" title="Couleur personnalisée du stylo" oninput="v34SetColor('pen',this.value)">`);
+ if(hp&&!hp.querySelector('.v35-color-custom')) hp.insertAdjacentHTML('beforeend',`<input class="v35-color-custom" type="color" value="${A.highColor||'#fde047'}" title="Couleur personnalisée du surligneur" oninput="v34SetColor('high',this.value)">`);
+}
+const open35=window.v32OpenAnnot; window.v32OpenAnnot=async function(sid,cid,i){await open35(sid,cid,i);setTimeout(v35EnhancePalette,0)};
+const tool35=window.v32Tool; window.v32Tool=function(t){tool35(t);v35EnhancePalette()};
+
+// 2) Flashcards: V34 used a second deck state that the real V30 study renderer could not read.
+// Always enter a deck through the original V30 public starter, which owns the study state.
+window.v35StartDeck=function(sub,cm){
+ try{ if(typeof seedV31==='function') seedV31(); if(typeof window.f30StartDeck!=='function') throw new Error('moteur de révision indisponible'); window.f30StartDeck(sub,cm); }
+ catch(e){console.error('SYFAXA V35 flashcards',e);let sec=document.getElementById('flashcards29');if(sec)sec.innerHTML=`<div class="v34-fc-error"><b>Erreur d’ouverture des flashcards.</b><br>${esc(e.message)}<br><button class="v29-btn" onclick="v34ResetFlashcards()">Réparer la banque</button></div>`}
+};
+const rf35=window.renderFlashcards30; window.renderFlashcards30=function(){
+ if(typeof seedV31==='function')seedV31(); rf35();
+ const sec=document.getElementById('flashcards29'); if(!sec)return;
+ sec.querySelectorAll('button[onclick^="v34OpenDeck("]').forEach(b=>b.setAttribute('onclick',b.getAttribute('onclick').replace('v34OpenDeck(','v35StartDeck(')));
+}; window.renderFlashcards29=window.renderFlashcards30;
+
+// 3) A small persistent post-it on the home page.
+let postTimer=null;
+window.v35SavePost=function(v){db.settings=db.settings||{};db.settings.homePostit=v;clearTimeout(postTimer);postTimer=setTimeout(()=>{try{save()}catch(e){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(_){}}},650)};
+function v35Postit(){
+ const home=document.getElementById('home');if(!home)return;
+ let old=document.getElementById('v35Postit');if(old)old.remove();
+ const d=document.createElement('aside');d.id='v35Postit';d.className='v35-postit';d.innerHTML=`<h3>À ne pas oublier ✎</h3><textarea maxlength="900" placeholder="Écris ici ce que tu veux garder sous les yeux…" oninput="v35SavePost(this.value)">${esc(db.settings?.homePostit||'')}</textarea><small>Enregistré automatiquement</small>`;home.appendChild(d);
+}
+const rh35=window.renderHome;window.renderHome=function(){rh35();setTimeout(v35Postit,0)};
+
+// Make the current page benefit immediately after the patch loads.
+setTimeout(()=>{try{if(document.getElementById('home')?.classList.contains('on'))v35Postit()}catch(e){}},100);
+})();
+</script>
+</body></html><style id="syfaxa-v19-tiffany-hero">
 /* V19 — bandeau accueil Tiffany franc, non pastel */
 #home17 .h17-hero{
   background:#20B8AE !important;
@@ -1358,5 +1405,49 @@ window.renderFlashcards30=function(){
 };window.renderFlashcards29=window.renderFlashcards30;
 // Ensure the fixed seed runs before the first visible Flashcards render.
 setTimeout(()=>{init33();try{renderHome()}catch(e){}},100);
+})();
+</script>
+
+<!-- SYFAXA V34 ANNOTATION PALETTES + INTERLEAVES + FLASHCARDS HARD FIX -->
+<style id="syfaxa-v34-css">
+.v34-palette{display:flex;align-items:center;gap:5px;padding:3px 6px;border:1px solid #d9e7e6;border-radius:12px;background:#f8fbfb}.v34-swatch{width:25px;height:25px!important;min-width:25px;padding:0!important;border-radius:50%!important;border:2px solid #fff!important;box-shadow:0 0 0 1px #b8ccca;cursor:pointer}.v34-swatch.sel{box-shadow:0 0 0 3px #173f3d}.v34-paper{background:#fff;position:absolute;inset:0;z-index:1}.v34-paper.grid{background-image:linear-gradient(#dce8e7 1px,transparent 1px),linear-gradient(90deg,#dce8e7 1px,transparent 1px);background-size:24px 24px}.v34-paper.lines{background-image:linear-gradient(transparent 31px,#cbdedd 32px);background-size:100% 32px}.v34-sheetbadge{font-size:11px;font-weight:850;color:#138d88;padding:5px 8px;background:#eaf8f6;border-radius:999px}.v34-fc-error{padding:16px;border:1px solid #f0cccc;background:#fff7f7;border-radius:16px;color:#842d2d}.v34-fc-empty{padding:28px;text-align:center;background:#fff;border:1px dashed #cbdedc;border-radius:18px}
+</style>
+<script id="syfaxa-v34-js">
+(()=>{
+const PEN_COLORS=['#173f3d','#111827','#2563eb','#7c3aed','#db2777','#dc2626','#ea580c','#16a34a'];
+const HIGH_COLORS=['#fde047','#86efac','#7dd3fc','#f9a8d4','#c4b5fd','#fdba74'];
+function v34Norm(){db.annotations=db.annotations||{};db.interleaves=db.interleaves||{};db.flashcards=Array.isArray(db.flashcards)?db.flashcards:[];if(typeof seedV31==='function')try{seedV31()}catch(e){}}
+function v34Settings(){A.penColor=A.penColor||'#173f3d';A.highColor=A.highColor||'#fde047';A.paperStyle=A.paperStyle||'blank';A.virtual=!!A.virtual;A.virtualIndex=A.virtualIndex??null}
+function v34PaletteHTML(){v34Settings();return `<div class="v34-palette" id="v34PenPalette" style="display:${A.tool==='pen'?'flex':'none'}">${PEN_COLORS.map(c=>`<button class="v34-swatch ${A.penColor===c?'sel':''}" style="background:${c}" onclick="v34SetColor('pen','${c}')" title="Couleur stylo"></button>`).join('')}</div><div class="v34-palette" id="v34HighPalette" style="display:${A.tool==='high'?'flex':'none'}">${HIGH_COLORS.map(c=>`<button class="v34-swatch ${A.highColor===c?'sel':''}" style="background:${c}" onclick="v34SetColor('high','${c}')" title="Couleur surligneur"></button>`).join('')}</div>`}
+window.v34SetColor=function(tool,c){v34Settings();if(tool==='pen')A.penColor=c;else A.highColor=c;document.querySelectorAll('#v34PenPalette .v34-swatch,#v34HighPalette .v34-swatch').forEach(x=>x.classList.remove('sel'));document.querySelectorAll(`.v34-swatch[style*="${c}"]`).forEach(x=>x.classList.add('sel'))}
+function v34MountToolbar(){let bar=document.querySelector('#v32Annot .v32-annbar');if(!bar)return;bar.querySelectorAll('.v34-palette,#v34SheetBtn,#v34SheetStyle').forEach(x=>x.remove());let erase=document.getElementById('v32Erase');erase?.insertAdjacentHTML('afterend',v34PaletteHTML());let spacer=bar.querySelector('.spacer');spacer?.insertAdjacentHTML('beforebegin',`<button id="v34SheetBtn" onclick="v34AddSheet()">＋ Feuille blanche</button><select id="v34SheetStyle" class="v32-mini" onchange="v34PaperStyle(this.value)" title="Style de feuille"><option value="blank">Blanche</option><option value="lines">Lignée</option><option value="grid">Quadrillée</option></select>`)}
+const oldTool=window.v32Tool;window.v32Tool=function(t){oldTool(t);v34Settings();let pp=document.getElementById('v34PenPalette'),hp=document.getElementById('v34HighPalette');if(pp)pp.style.display=t==='pen'?'flex':'none';if(hp)hp.style.display=t==='high'?'flex':'none'};
+function v34DocKey(){return A.sid+'|'+A.cid+'|'+A.name}
+function v34Sheets(){v34Norm();return db.interleaves[v34DocKey()]||(db.interleaves[v34DocKey()]={})}
+window.v34AddSheet=function(){if(!A.pdf)return;let after=A.virtual?A.virtualIndex:A.page,style=document.getElementById('v34SheetStyle')?.value||'blank',s=v34Sheets();let arr=s[after]||(s[after]=[]);arr.push({id:'sheet_'+Date.now(),style});save();A.virtual=true;A.virtualIndex=after;A.virtualSheet=arr.length-1;renderPage()}
+window.v34PaperStyle=function(style){v34Settings();A.paperStyle=style;if(A.virtual){let arr=v34Sheets()[A.virtualIndex]||[],sh=arr[A.virtualSheet];if(sh){sh.style=style;save();renderPage()}}}
+function v34AnnKey(){if(A.virtual){let arr=v34Sheets()[A.virtualIndex]||[],sh=arr[A.virtualSheet];return A.sid+'|'+A.cid+'|'+A.name+'|virtual|'+(sh?.id||'none')}return A.sid+'|'+A.cid+'|'+A.name+'|'+A.page}
+// Override the annotation store so strokes on inserted sheets are separate.
+window.v34PageAnn=function(){v34Norm();let k=v34AnnKey();return db.annotations[k]||(db.annotations[k]={strokes:[],notes:[]})}
+// Rebind global helpers used by drawing code via lexical-independent wrappers below.
+function v34DrawInk(){let c=document.getElementById('v32Ink');if(!c)return;let x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);v34PageAnn().strokes.forEach(s=>{if(!s.pts?.length)return;x.beginPath();x.lineCap='round';x.lineJoin='round';x.strokeStyle=s.color||(s.tool==='high'?'rgba(253,224,71,.38)':'#173f3d');x.globalAlpha=s.tool==='high'?.38:1;x.lineWidth=(s.tool==='high'?18:2.5)*(A.scale||1);let p=s.pts[0];x.moveTo(p.x*c.width,p.y*c.height);s.pts.slice(1).forEach(p=>x.lineTo(p.x*c.width,p.y*c.height));x.stroke();x.globalAlpha=1})}
+function v34DrawNotes(){let box=document.getElementById('v32Notes');if(!box)return;box.innerHTML='';v34PageAnn().notes.forEach((n,i)=>{let d=document.createElement('div');d.className='v32-note';d.style.left=(n.x*100)+'%';d.style.top=(n.y*100)+'%';d.textContent=n.text;d.ondblclick=()=>{if(confirm('Supprimer cette notion ?')){v34PageAnn().notes.splice(i,1);save();v34DrawNotes()}};box.appendChild(d)})}
+window.v34RenderPage=async function(){v34Settings();let pc=document.getElementById('v32PdfCanvas'),ic=document.getElementById('v32Ink'),st=document.getElementById('v32Stage'),notes=document.getElementById('v32Notes');st.querySelectorAll('.v34-paper').forEach(x=>x.remove());if(A.virtual){let w=Math.min(window.innerWidth-40,1100),h=Math.round(w*1.414);pc.width=ic.width=w;pc.height=ic.height=h;pc.style.width=ic.style.width=w+'px';pc.style.height=ic.style.height=h+'px';st.style.width=w+'px';st.style.height=h+'px';pc.getContext('2d').clearRect(0,0,w,h);let arr=v34Sheets()[A.virtualIndex]||[],sh=arr[A.virtualSheet]||{style:'blank'};let p=document.createElement('div');p.className='v34-paper '+(sh.style||'blank');st.insertBefore(p,pc);pc.style.visibility='hidden';notes.style.zIndex='4';ic.style.zIndex='3';v32PageInfo.innerHTML=`<span class="v34-sheetbadge">Feuille ajoutée</span>`;A.scale=1;v34DrawInk();v34DrawNotes();return}pc.style.visibility='visible';let pg=await A.pdf.getPage(A.page),base=pg.getViewport({scale:1}),max=Math.min(window.innerWidth-40,1100),scale=Math.max(.7,Math.min(1.7,max/base.width));A.scale=scale;let vp=pg.getViewport({scale});pc.width=ic.width=Math.round(vp.width);pc.height=ic.height=Math.round(vp.height);pc.style.width=ic.style.width=vp.width+'px';pc.style.height=ic.style.height=vp.height+'px';st.style.width=vp.width+'px';st.style.height=vp.height+'px';await pg.render({canvasContext:pc.getContext('2d'),viewport:vp}).promise;v32PageInfo.textContent=A.page+' / '+A.pdf.numPages;v34DrawInk();v34DrawNotes()}
+// Replace page navigation: inserted sheets live immediately after their PDF page.
+window.v32Next=async function(){if(A.virtual){let arr=v34Sheets()[A.virtualIndex]||[];if(A.virtualSheet<arr.length-1){A.virtualSheet++;return v34RenderPage()}A.virtual=false;A.page=Math.min(A.pdf.numPages,A.virtualIndex+1);return v34RenderPage()}let arr=v34Sheets()[A.page]||[];if(arr.length){A.virtual=true;A.virtualIndex=A.page;A.virtualSheet=0;return v34RenderPage()}if(A.page<A.pdf.numPages){A.page++;return v34RenderPage()}}
+window.v32Prev=async function(){if(A.virtual){if(A.virtualSheet>0){A.virtualSheet--;return v34RenderPage()}A.virtual=false;A.page=A.virtualIndex;return v34RenderPage()}if(A.page>1){let prev=A.page-1,arr=v34Sheets()[prev]||[];if(arr.length){A.virtual=true;A.virtualIndex=prev;A.virtualSheet=arr.length-1;return v34RenderPage()}A.page--;return v34RenderPage()}}
+window.v32Undo=function(){let a=v34PageAnn();if(a.strokes.length)a.strokes.pop();else if(a.notes.length)a.notes.pop();save();v34DrawInk();v34DrawNotes()};window.v32ClearPage=function(){if(confirm('Effacer toutes les annotations de cette page ?')){db.annotations[v34AnnKey()]={strokes:[],notes:[]};save();v34DrawInk();v34DrawNotes()}}
+// Capture pointer events before the old V32 listeners so colors + inserted sheets use the V34 store.
+let ink=document.getElementById('v32Ink');if(ink){['pointerdown','pointermove','pointerup','pointercancel'].forEach(type=>ink.addEventListener(type,e=>{if(type==='pointerdown'){e.stopImmediatePropagation();e.preventDefault();v34Settings();let r=ink.getBoundingClientRect(),p={x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height},a=v34PageAnn();if(A.tool==='text'){let t=prompt('Notion / annotation à placer :');if(t){a.notes.push({x:p.x,y:p.y,text:t});save();v34DrawNotes()}return}if(A.tool==='erase'){let best=-1,bd=.04;a.strokes.forEach((s,i)=>s.pts?.forEach(q=>{let d=Math.hypot(q.x-p.x,q.y-p.y);if(d<bd){best=i;bd=d}}));if(best>=0){a.strokes.splice(best,1);save();v34DrawInk()}return}A.drawing=true;A.stroke={tool:A.tool,color:A.tool==='high'?A.highColor:A.penColor,pts:[p]};a.strokes.push(A.stroke);v34DrawInk()}else if(type==='pointermove'){if(!A.drawing||!A.stroke)return;e.stopImmediatePropagation();e.preventDefault();let r=ink.getBoundingClientRect();A.stroke.pts.push({x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height});v34DrawInk()}else if(A.drawing){e.stopImmediatePropagation();A.drawing=false;A.stroke=null;save()}},{capture:true,passive:false}))}
+const open34=window.v32OpenAnnot;window.v32OpenAnnot=async function(sid,cid,i){await open34(sid,cid,i);if(A?.pdf){v34Settings();v34MountToolbar();await v34RenderPage()}}
+// ---------- Flashcards hard fix ----------
+function v34SeedFlash(){try{if(typeof seedV31==='function')seedV31()}catch(e){};v34Norm();return db.flashcards}
+function v34CardLabel(c){let s=subjects().find(x=>x.id===c.subject),co=s?.courses?.find(x=>x.id===c.cm);return {s:s?.name||c.subject,co:co?.code||c.cm,title:co?.title||c.cm}}
+window.v34OpenDeck=function(sub,cm){try{let a=v34SeedFlash().filter(c=>c.subject===sub&&c.cm===cm);if(!a.length)return alert('Aucune flashcard dans ce module.');window.f30Deck=a.slice().sort(()=>Math.random()-.5);window.f30Index=0;window.f30Reveal=false;window.f30DrawStudyPublic()}catch(e){alert('Erreur flashcards : '+e.message);console.error(e)}}
+window.renderFlashcards30=function(){let sec=document.getElementById('flashcards29');if(!sec)return;try{let cards=v34SeedFlash().filter(c=>['neuro','child','adult','culture'].includes(c.subject));let modules=[];['neuro','child','adult','culture'].forEach(sid=>{let s=subjects().find(x=>x.id===sid);(s?.courses||[]).filter(c=>!db.hiddenCourses?.includes(sid+'|'+c.id)).forEach(c=>{let a=cards.filter(x=>x.subject===sid&&x.cm===c.id);modules.push({sid,s,c,a})})});sec.innerHTML=`<div class="v30-flash-shell"><div class="v30-flash-hero"><div class="ey">RÉCUPÉRATION ACTIVE · LAS 2</div><h1>Flashcards</h1><p>Flashcards issues de tes supports. Pas de statistiques.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><span class="v30-pill">${cards.length} cartes</span><button class="v29-btn v29-soft" onclick="f30ToggleCreate()">＋ Créer une carte</button></div></div><div class="v30-deck-grid">${modules.map(d=>`<div class="v30-deck"><div class="v30-deck-icon">${d.c.code.startsWith('TD')?'TD':d.s.name[0]}</div><div class="v30-deck-main"><div class="v30-meta">${esc(d.s.name)} · ${esc(d.c.code)}</div><h3>${esc(d.c.title)}</h3><div class="v30-meta">${d.a.length} cartes</div><div class="v30-deck-actions"><button class="v29-btn" ${d.a.length?'':'disabled'} onclick="v34OpenDeck('${d.sid}','${d.c.id}')">Réviser</button><button class="v29-btn v29-soft" onclick="f30CreateFor('${d.sid}','${d.c.id}')">＋ Ajouter</button>${d.a.length?`<button class="v30-trash" onclick="f30ManageDeck('${d.sid}','${d.c.id}')">Gérer</button>`:''}</div></div></div>`).join('')}</div></div>`}catch(e){sec.innerHTML=`<div class="v34-fc-error"><b>Impossible d’afficher les flashcards.</b><br>${esc(e.message)}<br><button class="v29-btn" style="margin-top:10px" onclick="v34ResetFlashcards()">Réparer la banque</button></div>`;console.error(e)}};
+window.renderFlashcards29=window.renderFlashcards30;window.v34ResetFlashcards=function(){db.flashcards=[];try{seedV31()}catch(e){}save();renderFlashcards30()};
+// Last show wrapper: always render after section activation, with errors contained inside Flashcards.
+const show34=window.show;window.show=function(id){show34(id);if(id==='flashcards29')setTimeout(()=>{try{renderFlashcards30()}catch(e){console.error(e)}},30)};
+setTimeout(()=>{v34SeedFlash()},100);
 })();
 </script>
